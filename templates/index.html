@@ -1,0 +1,152 @@
+{% extends 'base.html' %} {% block title %}Home{% endblock %} {% block body %}
+
+<div class="container-fulid">
+  <div id="carouselExampleIndicators" class="carousel slide">
+    <div class="carousel-indicators">
+      <button
+        type="button"
+        data-bs-target="#carouselExampleIndicators"
+        data-bs-slide-to="0"
+        class="active"
+        aria-current="true"
+        aria-label="Slide 1"
+      ></button>
+      <button
+        type="button"
+        data-bs-target="#carouselExampleIndicators"
+        data-bs-slide-to="1"
+        aria-label="Slide 2"
+      ></button>
+      <button
+        type="button"
+        data-bs-target="#carouselExampleIndicators"
+        data-bs-slide-to="2"
+        aria-label="Slide 3"
+      ></button>
+    </div>
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <div class="overlay">
+          <img
+            src="../static/Images/hero_1.jpg"
+            class="d-block w-100"
+            alt="hero_1"
+          />
+        </div>
+      </div>
+      <div class="carousel-item">
+        <div class="overlay">
+          <img
+            src="../static/Images/hero_2.jpeg"
+            class="d-block w-100"
+            alt="hero_2"
+          />
+        </div>
+      </div>
+      <div class="carousel-item">
+        <div class="overlay">
+          <img
+            src="../static/Images/hero_3.jpg"
+            class="d-block w-100"
+            alt="hero_3"
+          />
+        </div>
+      </div>
+    </div>
+    <button
+      class="carousel-control-prev"
+      type="button"
+      data-bs-target="#carouselExampleIndicators"
+      data-bs-slide="prev"
+    >
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button
+      class="carousel-control-next"
+      type="button"
+      data-bs-target="#carouselExampleIndicators"
+      data-bs-slide="next"
+    >
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+  <div class="container mt-5">
+    <!-- Question 1 -->
+    <div class="d-flex flex-row justify-content-center my-3">
+      <div class="col-md-6">
+        <h2>What is plagiarism?</h2>
+        <p>
+          Plagiarism is the act of using someone else's work, ideas, or
+          intellectual property without giving proper credit.
+        </p>
+      </div>
+      <div class="col-md-3 ms-4">
+        <img
+          src="../static/Images/Plagiarism1.jpg"
+          alt="Plagiarism Image"
+          class="img-fluid"
+        />
+      </div>
+    </div>
+
+    <!-- Question 2 -->
+    <div class="d-flex flex-row-reverse justify-content-center my-3">
+      <div class="col-md-6">
+        <h2>Why is it important to avoid plagiarism?</h2>
+        <p>
+          Avoiding plagiarism is crucial to maintain academic integrity and
+          intellectual honesty. It ensures that credit is given where it's due.
+        </p>
+      </div>
+      <div class="col-md-3 me-4">
+        <img
+          src="../static/Images/Plagiarism2.jpg"
+          alt="Importance of Avoiding Plagiarism"
+          class="img-fluid"
+        />
+      </div>
+    </div>
+
+    <!-- Question 3 -->
+    <div class="d-flex flex-row justify-content-center my-3">
+      <div class="col-md-6">
+        <h2>How does our plagiarism checker work?</h2>
+        <p>
+          Our plagiarism checker uses advanced algorithms to compare your text
+          with a vast database of academic and online content to identify
+          similarities.
+        </p>
+      </div>
+      <div class="col-md-3 ms-4">
+        <img
+          src="../static/Images/Plagiarism3.png"
+          alt="Plagiarism Checker"
+          class="img-fluid"
+        />
+      </div>
+    </div>
+
+    <!-- Question 4 -->
+    <div class="d-flex flex-row-reverse justify-content-center my-3">
+      <div class="col-md-6">
+        <h2>What types of files can our plagiarism checker analyze?</h2>
+        <p>
+          Our plagiarism checker can analyze various types of files, including
+          word document, pdf file & text files.
+        </p>
+      </div>
+      <div class="col-md-3 me-4">
+        <img
+          src="../static/Images/Plagiarism4.png"
+          alt="Types of Documents"
+          class="img-fluid"
+        />
+      </div>
+    </div>
+
+    <!-- Repeat similar structure for other questions -->
+  </div>
+</div>
+{% endblock %}

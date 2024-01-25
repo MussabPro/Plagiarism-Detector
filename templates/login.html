@@ -1,0 +1,109 @@
+{% extends 'base.html' %} {% block title %}Login{% endblock %} {% block body %}
+<div class="container">
+  <div class="row justify-content-center align-items-center min-vh-100">
+    <div class="col-12 col-sm-8 col-md-6 col-lg-4">
+      <div class="card p-4 shadow">
+        <h2 class="text-center font-weight-bold mb-4">Login</h2>
+        <form action="/login" method="post" class="needs-validation" novalidate>
+          <div class="form-group">
+            <div class="col-md-full">
+              <label for="validationCustomUsername" class="form-label"
+                >Username</label
+              >
+              <div class="input-group has-validation">
+                <span class="input-group-text" id="inputGroupPrepend">@</span>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="validationCustomUsername"
+                  aria-describedby="inputGroupPrepend"
+                  placeholder="Username..."
+                  name="username"
+                  required
+                />
+                <div class="invalid-feedback">
+                  Please enter a vaild username.
+                </div>
+              </div>
+            </div>
+            <label for="inputPassword5" class="form-label">Password</label>
+            <div class="input-group has-validation">
+              <span class="input-group-text" id="inputGroupPrepend">
+                <i class="fa-solid fa-lock"></i>
+              </span>
+              <input
+                type="password"
+                id="inputPassword5"
+                class="form-control"
+                placeholder="Password..."
+                aria-describedby="passwordHelpBlock"
+                name="password"
+                required
+              />
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                onclick="togglePasswordVisibility('inputPassword5')"
+              >
+                <i class="fa-solid fa-eye"></i>
+              </button>
+              <div class="invalid-feedback">Please enter password.</div>
+            </div>
+            <div class="my-2">
+              <a href="/register">Create an Account.</a>
+            </div>
+            {% if error_message != "" %}
+            <div class="invalid-feedback" style="display: block !important">
+              {{ error_message }}
+            </div>
+            {% endif %}
+
+            <div class="d-flex flex-row justify-content-center mt-3">
+              <button type="submit" class="btn btn-outline-primary">
+                Sign In
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  // Example starter JavaScript for disabling form submissions if there are invalid fields
+  function togglePasswordVisibility(inputId) {
+    const passwordInput = document.getElementById(inputId);
+    const button = passwordInput.nextElementSibling;
+
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      button.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+    } else {
+      passwordInput.type = "password";
+      button.innerHTML = '<i class="fa-solid fa-eye"></i>';
+    }
+  }
+  (() => {
+    "use strict";
+
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    const forms = document.querySelectorAll(".needs-validation");
+
+    // Loop over them and prevent submission
+    Array.from(forms).forEach((form) => {
+      form.addEventListener(
+        "submit",
+        (event) => {
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+
+          form.classList.add("was-validated");
+        },
+        false
+      );
+    });
+  })();
+</script>
+{% endblock %}

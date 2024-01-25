@@ -1,0 +1,37 @@
+{% extends 'base.html' %} {% block title %}Plagiarism Report{% endblock %} {%
+block body %}
+<div class="container shadow border rounded mt-5 mb-5 p-5">
+  <h2>Plagiarism Report</h2>
+  <ol>
+    {% for result in plagiarism_results %}
+    <li>
+      {{ result.assignment1_name }}'s Assignment vs {{ result.assignment2_name
+      }}'s Assignment
+      <ul>
+        <li>Percentage : {{ result.percentage|round(2) }}%</li>
+        <li>
+          Exclude References : {% if result.exclude_references==True %}Yes{%
+          else %}No{% endif %}
+        </li>
+        <li>
+          Exclude Quotes : {% if result.exclude_quotes==True %}Yes{% else %}No{%
+          endif %}
+        </li>
+        <li>
+          Plagiarism Sources :
+          <ol>
+            {% for plagiarism_source in result.plagiarism_sources %}
+            <li>
+              <a href="{{plagiarism_source}}" target="_blank"
+                >{{plagiarism_source}}</a
+              >
+            </li>
+            {% endfor %}
+          </ol>
+        </li>
+      </ul>
+    </li>
+    {% endfor %}
+  </ol>
+</div>
+{% endblock %}

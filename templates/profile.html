@@ -1,0 +1,33 @@
+{% extends 'base.html' %} {% block title %}Profile{% endblock %} {% block body
+%}
+<div class="container-fulid">
+  {% if user %}
+  <div
+    class="d-flex flex-column align-items-center justify-content-center flex-wrap"
+  >
+    <h2 class="display-2">{{user.role}}</h2>
+    <h4 class="text-secondary display-4">Firstname : {{user.Fname}}</h4>
+    {% if user.Lname %}
+    <h4 class="text-secondary display-4">Lastname : {{user.Lname}}</h4>
+    {% endif %}
+    <h5 class="text-secondary display-5">Usernam : {{user.username}}</h5>
+    <h4 class="text-secondary display-4">
+      E-mail :
+      <a href="mailto:{{user.email}}">{{user.email}}</a>
+    </h4>
+    <h4 class="text-secondary display-4">PhoneNo:{{user.phoneno}}</h4>
+    <h4 class="text-secondary display-4">Course:{{user.Course}}</h4>
+    <form action="/logout" method="post">
+      <button type="submit" class="btn btn-outline-danger mt-3">LogOut</button>
+    </form>
+  </div>
+  {% else %}
+  <div
+    class="d-flex flex-column justify-content-center aglin-items-center text-center"
+  >
+    <h2 class="display-2">Login First</h2>
+    <h3><a href="/login">Login</a></h3>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,186 @@
+{% extends 'base.html' %} {% block title %}Dashboard{% endblock %} {% block body
+%}
+<div class="container-fulid">
+  {% if user %}
+  <div class="m-5">
+    <h1 class="text-center">
+      Welcome {{user.Fname}} {% if user.Lname %}{{user.Lname}}{% endif %}
+    </h1>
+    {% if not(assignmentquestionfile) %}
+    <h1 class="text-center">No Assignment Assigned yet.</h1>
+    {% else %}
+    <h2 class="text-center">
+      Assignment Question
+      <a href="/download_assignment_question/{{assignmentquestionfile.id}}"
+        >{{assignmentquestionfile.filename}}</a
+      >
+    </h2>
+    <div class="d-flex flex-row justify-content-around">
+      <div class="w-50 mx-3 border rounded">
+        {% if not(assignment.file_data) %}
+        <div class="text-center bg-warning bg-gradient rounded m-1">
+          <label for="AssignmentUpload"><h3>Upload Assignment</h3></label>
+        </div>
+        {% if assignmentduedate %}
+        <h3 class="text-center my-3">
+          Due Date of Assignment is {{assignmentduedate.due_date}}
+        </h3>
+        {% else %}
+        <h3 class="text-center my-3">
+          Due Date of Assignment is not set by teacher yet.
+        </h3>
+        {% endif %} {% if timepassed %}
+        <h4 class="text-danger m-1">The Due Date for submittion has passed.</h4>
+        {% else %}
+        <form
+          action="/upload_assignment"
+          enctype="multipart/form-data"
+          method="POST"
+          class="needs-validation"
+          novalidate
+        >
+          <div class="d-flex justify-content-around align-items-center w-100">
+            <div class="my-3 w-75">
+              <input
+                class="form-control m-2 w-100"
+                type="file"
+                id="AssignmentUpload"
+                aria-label="file example"
+                accept=".txt,.pdf,.docx"
+                name="file"
+                required
+              />
+              {% with messages = get_flashed_messages() %} {% if messages %}
+              {%for message in messages %}
+              <div class="invalid-feedback mx-2" style="display: block">
+                {{ message }}
+              </div>
+              {% endfor %} {% endif %} {% endwith %}
+              <div class="invalid-feedback mx-2">Select Assignment</div>
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-outline-warning my-3"
+              value="Upload"
+            >
+              Upload
+            </button>
+          </div>
+        </form>
+        {% endif %} {% else %}
+        <div class="text-center bg-warning bg-gradient rounded m-1">
+          <h3>Uploaded Assignment</h3>
+        </div>
+        <div class="p-3">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>File name</th>
+                <th>Upload Time</th>
+                <th>Status</th>
+                <th>Download</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{assignment.filename}}</td>
+                <td>{{assignment.timeuploaded}}</td>
+                <td>{{assignment.status}}</td>
+                <td>
+                  <i class="fa-solid fa-download" style="color: #000000"></i>
+                  <a
+                    href="{{ url_for('download_assignment', id=assignment.id) }}"
+                  >
+                    Download</a
+                  >
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      </div>
+      <div class="w-50 mx-3 border rounded">
+        <div class="text-center bg-warning bg-gradient rounded m-1">
+          <h3>Result of Assignments</h3>
+        </div>
+        <div
+          class="d-flex flex-row align-items-center justify-content-center h-75 p-3"
+        >
+          {% if assignment %} {% if assignment.status=="Not Checked" %}
+          <h2 class="text-center">Result Not Uploaded yet.</h2>
+          {% else %}
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Total Marks</th>
+                <th>Obt. Marks</th>
+                <th>Comment</th>
+                <th>Plagiarism %</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{assignment.totalmarks}}</td>
+                <td>{{assignment.obtmarks}}</td>
+                <td>{{assignment.comment}}</td>
+                <td>
+                  {% if assignment.plagiarism_report %}
+                  <a href="plagiarism_report/{{assignment.id}}">
+                    {% set total = [0] %} {% for item in
+                    assignment.plagiarism_report %} {% set _ =
+                    total.append(total.pop() + item.percentage) %} {% endfor %}
+                    {% set average = total[0] /
+                    assignment.plagiarism_report|length %} {{ average|round(2)
+                    }}%
+                  </a>
+
+                  {% endif %}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          {% endif %} {% else %}
+          <h2 class="text-center">No Assignment Found!</h2>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      // Fetch all the forms we want to apply custom Bootstrap validation styles to
+      const forms = document.querySelectorAll(".needs-validation");
+
+      // Loop over them and prevent submission
+      Array.from(forms).forEach((form) => {
+        form.addEventListener(
+          "submit",
+          (event) => {
+            if (!form.checkValidity()) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+
+            form.classList.add("was-validated");
+          },
+          false
+        );
+      });
+    })();
+  </script>
+  {% else %}
+  <div
+    class="d-flex flex-column justify-content-center aglin-items-center text-center"
+  >
+    <h2 class="display-2">Login First</h2>
+    <h3><a href="/login">Login</a></h3>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

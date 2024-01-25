@@ -1,0 +1,57 @@
+{% extends 'base.html' %} {% block title %}Marking{% endblock %} {% block body
+%}
+<div class="container-fulid">
+  <form action="/Markassignment/{{assignment.id}}" method="post">
+    <div class="container shadow border rounded p-3 mt-2">
+      <h2 class="text-center">Assignment Marks</h2>
+      <label for="totalmark" class="form-label"> Total Marks </label>
+      <input
+        type="number"
+        class="form-control"
+        name="totalmark"
+        id="totalmark"
+        value="{% if not(assignment.totalmarks==None) %}{{assignment.totalmarks}}{% endif %}"
+        placeholder="Total Marks..."
+        oninput="limitinput(this)"
+      />
+      <label for="obtmark" class="form-label">Obt. Marks</label>
+      <input
+        type="number"
+        class="form-control"
+        name="obtmark"
+        id="obtmark"
+        value="{% if not(assignment.obtmarks==None) %}{{assignment.obtmarks}}{%endif %}"
+        placeholder="Obt. Marks..."
+        oninput="limitinput(this)"
+      />
+      <label for="comment" class="form-label">Comment</label>
+
+      <textarea
+        class="form-control"
+        name="comment"
+        id="comment"
+        placeholder="Comment..."
+        rows="3"
+      >
+{% if not(assignment.comment==None) %}{{assignment.comment}}{%endif %}</textarea
+      >
+
+      <div class="d-flex flex-row justify-content-center">
+        <button type="submit" class="btn btn-outline-success mt-3 mb-2">
+          Update
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+<script>
+  let limitinput = (element) => {
+    let value = parseInt(element.value, 10);
+    if (isNaN(value)) {
+      element.value = ""; // Reset to empty if not a number
+    } else {
+      element.value = Math.max(0, Math.min(100, value)); // Limit to the range [0, 100]
+    }
+  };
+</script>
+{% endblock %}

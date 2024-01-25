@@ -1,0 +1,203 @@
+{% extends 'base.html' %} {% block title %}Dashboard{% endblock %} {% block body
+%}
+<div class="container-fulid">
+  <h1 class="text-center">Welcome to the Teacher of {{user.Course}}</h1>
+  <h2 class="text-center text-secondary">
+    {{user.Fname}} {% if user.Lname %} {{user.Lname}} {% endif %}
+  </h2>
+  <div class="container my-3 shadow rounded border p-4">
+    <h2 class="text-center mt-2 mb-4">
+      {% if not(assignmentquestionfile) %} Upload{%endif%} Assignment Question
+      File
+    </h2>
+    {% if not(assignmentquestionfile) %}
+    <form
+      action="/uploadquestionassignment"
+      enctype="multipart/form-data"
+      method="POST"
+      class="needs-validation"
+      novalidate
+    >
+      <input
+        class="form-control"
+        type="file"
+        aria-label="file example"
+        accept=".txt,.pdf,.docx"
+        name="file"
+        required
+      />
+      {% with messages = get_flashed_messages() %} {% if messages %} {% for
+      message in messages %}
+      <div class="invalid-feedback" style="display: block">{{ message }}</div>
+      {% endfor %} {% endif %} {% endwith %}
+      <div class="invalid-feedback">Select Assignment Question File</div>
+      <div class="d-flex flex-row justify-content-center">
+        <button
+          type="submit"
+          class="btn btn-outline-warning my-3"
+          value="Upload"
+        >
+          Upload
+        </button>
+      </div>
+    </form>
+    {% else %}
+    <h2 class="text-center">
+      <a href="/download_assignment_question/{{assignmentquestionfile.id}}"
+        >{{assignmentquestionfile.filename}}</a
+      >
+    </h2>
+    {% endif %}
+  </div>
+  <form
+    method="POST"
+    action="/UpdateDueDate"
+    class="needs-validation"
+    novalidate
+  >
+    <div class="container shadow border rounded p-4">
+      <h3 class="text-center">
+        {% if assignmentduedate %}Update{% else %}Set{% endif %} Assignment Due
+        Date
+      </h3>
+      {% if assignmentduedate %}
+      <h5 class="text-center text-secondary">
+        Due date : {% if formatted_due_date %}{{formatted_due_date}}{% endif %}
+      </h5>
+      {%endif%}
+      <label for="duedate" class="form-label">Assignment Submittion date</label>
+      <input
+        type="datetime-local"
+        class="form-control"
+        name="duedate"
+        id="duedate"
+        required
+      />
+      <div class="invalid-feedback">Select Due Date</div>
+      <div class="d-flex flex-row justify-content-center">
+        <button type="submit" class="btn btn-success mt-5">Submit</button>
+      </div>
+    </div>
+  </form>
+  <div class="container mt-4 mb-4 border rounded shadow p-3">
+    {% if not(allassignment) %}
+    <h4 class="text-center text-danger">No assignments Submitted yet.</h4>
+    {% else %}
+    <table class="table table-hover table-bordered">
+      <thead>
+        <tr>
+          <th class="align-middle">#</th>
+          <th class="align-middle">Student name</th>
+          <th class="align-middle">Filename</th>
+          <th class="align-middle">Timeuploaded</th>
+          <th class="text-center align-middle">Total Marks</th>
+          <th class="text-center align-middle">Obt. Marks</th>
+          <th class="text-center align-middle">Plagiarism %</th>
+          <th class="align-middle">Comment</th>
+          <th class="align-middle text-center">Status</th>
+          <th class="align-middle text-center">Download</th>
+          <th class="align-middle text-center">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for assignment in allassignment %}
+        <tr>
+          <td class="align-middle">{{loop.index}}</td>
+          <td class="align-middle">
+            {{assignment.user.Fname}}{% if assignment.user.Lname %}
+            {{assignment.user.Lname}}{% endif %}
+          </td>
+          <td class="align-middle">{{assignment.filename}}</td>
+          <td class="align-middle">
+            {{assignment.timeuploaded.strftime( "%d-%m-%Y %I:%M:%S %p")}}
+          </td>
+          <td class="align-middle text-center">
+            {% if not(assignment.totalmarks==None) %} {{assignment.totalmarks}}
+            {% endif %}
+          </td>
+          <td class="align-middle text-center">
+            {% if not(assignment.obtmarks==None) %} {{assignment.obtmarks}}
+            {%endif %}
+          </td>
+          <td class="align-middle text-center">
+            {% if assignment.plagiarism_report %}
+            <a href="plagiarism_report/{{assignment.id}}">
+              {% set total = [0] %} {% for item in assignment.plagiarism_report
+              %} {% set _ = total.append(total.pop() + item.percentage) %} {%
+              endfor %} {% set average = total[0] /
+              assignment.plagiarism_report|length %} {{ average|round(2) }}%
+            </a>
+
+            {% endif %}
+          </td>
+          <td class="align-middle">
+            {% if not(assignment.comment==None) %} {{assignment.comment}}
+            {%endif %}
+          </td>
+          <td class="align-middle text-center">{{assignment.status}}</td>
+          <td class="align-middle text-center">
+            <i class="fa-solid fa-download" style="color: #000000"></i>
+            <a href="{{ url_for('download_assignment', id=assignment.id) }}">
+              Download
+            </a>
+          </td>
+          <td class="align-middle text-center">
+            <a
+              href="/CheckPlagiarism/{{assignment.id}}"
+              class="btn btn-outline-danger m-1"
+              >Get Plagiarism Report</a
+            >
+            <a
+              href="/Markassignment/{{assignment.id}}"
+              class="btn btn-outline-warning m-1"
+            >
+              Mark Assignment
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
+  {% if all_checked and timepassed %}
+  <div class="container shadow border my-4 p-4 rounded">
+    <h3 class="text-center">
+      All Assignment Checked sucessfully and due date also passed.
+    </h3>
+    <h4 class="text-center text-secondary">
+      Now you can Press this button to delete all assignments.
+    </h4>
+    <form action="/deleteall" method="post">
+      <div class="d-flex flex-row justify-content-center">
+        <button type="submit" class="btn btn-outline-danger">Delete</button>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+</div>
+<script>
+  (() => {
+    "use strict";
+
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    const forms = document.querySelectorAll(".needs-validation");
+
+    // Loop over them and prevent submission
+    Array.from(forms).forEach((form) => {
+      form.addEventListener(
+        "submit",
+        (event) => {
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+
+          form.classList.add("was-validated");
+        },
+        false
+      );
+    });
+  })();
+</script>
+{% endblock %}
