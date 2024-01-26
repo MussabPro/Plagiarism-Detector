@@ -1,0 +1,8 @@
+Flask
+flask_sqlalchemy
+sqlalchemy
+PyPDF2
+python-docx
+google
+nltk
+Werkzeug
