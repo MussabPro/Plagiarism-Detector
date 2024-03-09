@@ -1,4 +1,4 @@
-Flask
+Flask = 2.3.2
 flask_sqlalchemy
 sqlalchemy
 PyPDF2
