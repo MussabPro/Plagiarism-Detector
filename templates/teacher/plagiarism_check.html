@@ -1,0 +1,106 @@
+{% extends "base.html" %} {% block title %}Plagiarism Check — PlagCheck{%
+endblock %} {% block content %}
+<div class="page-md">
+  <div class="page-header">
+    <h1>Plagiarism Check</h1>
+    <p>Run similarity analysis on the selected submission.</p>
+  </div>
+
+  <div class="card" style="margin-bottom: 16px">
+    <div class="section-title">Submission</div>
+    <div
+      style="display: flex; align-items: center; justify-content: space-between"
+    >
+      <div>
+        <div class="font-mono" style="font-weight: 600; font-size: 15px">
+          {{ assignment.filename }}
+        </div>
+        <div class="text-sm text-muted mt-4">
+          By: {{ assignment.user.Fname }} {{ assignment.user.Lname or '' }} ·
+          Submitted: {{ assignment.timeuploaded.strftime('%B %d, %Y %H:%M') if
+          assignment.timeuploaded else '—' }}
+        </div>
+      </div>
+      <a
+        href="/download-assignment/{{ assignment.id }}"
+        class="btn btn-secondary btn-sm"
+        >Download</a
+      >
+    </div>
+    {% if assignment.status.value == 'Checked' %}
+    <div class="alert alert-info" style="margin-top: 14px; margin-bottom: 0">
+      This submission was already checked.
+      <a
+        href="/teacher/plagiarism-report/{{ assignment.id }}"
+        style="color: var(--accent); font-weight: 500"
+        >View existing report →</a
+      >
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-title">Analysis Options</div>
+    <form method="post" action="/teacher/plagiarism/{{ assignment.id }}">
+      <div class="form-group">
+        <label
+          style="display: flex; align-items: center; gap: 8px; cursor: pointer"
+        >
+          <input
+            name="exclude_references"
+            type="checkbox"
+            style="width: 16px; height: 16px"
+          />
+          <div>
+            <div style="font-weight: 500">Exclude References</div>
+            <div class="form-hint" style="margin-top: 0">
+              Remove bibliography and reference sections before analysis.
+            </div>
+          </div>
+        </label>
+      </div>
+      <div class="form-group">
+        <label
+          style="display: flex; align-items: center; gap: 8px; cursor: pointer"
+        >
+          <input
+            name="exclude_quotes"
+            type="checkbox"
+            style="width: 16px; height: 16px"
+          />
+          <div>
+            <div style="font-weight: 500">Exclude Quoted Text</div>
+            <div class="form-hint" style="margin-top: 0">
+              Ignore text inside quotation marks.
+            </div>
+          </div>
+        </label>
+      </div>
+
+      <div class="alert alert-warn" style="margin-bottom: 16px">
+        This will compare the submission against all other submissions in
+        <strong>{{ current_user.Course }}</strong>. The process may take a few
+        seconds.
+      </div>
+
+      <div style="display: flex; gap: 10px">
+        <button type="submit" class="btn btn-primary">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          Run Plagiarism Check
+        </button>
+        <a href="/teacher/submissions" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

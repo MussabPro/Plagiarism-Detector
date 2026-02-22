@@ -1,0 +1,254 @@
+{% extends "base.html" %} {% block title %}Plagiarism Report — PlagCheck{%
+endblock %} {% block content %}
+<div class="page">
+  <div class="flex items-center justify-between page-header">
+    <div>
+      <h1>Plagiarism Report</h1>
+      <p>
+        Analysis results for submission
+        <span class="font-mono">{{ assignment.filename }}</span>
+      </p>
+    </div>
+    <div style="display: flex; gap: 10px">
+      <a
+        href="/teacher/grade/{{ assignment.id }}"
+        class="btn btn-primary btn-sm"
+        >Grade This →</a
+      >
+      <a href="/teacher/submissions" class="btn btn-secondary btn-sm"
+        >← Submissions</a
+      >
+    </div>
+  </div>
+
+  {% if report %}
+  <!-- Score summary -->
+  <div class="card-grid" style="margin-bottom: 24px">
+    <div class="stat-card">
+      <div
+        class="stat-value"
+        style="color:
+        {% if report.plagiarism_percentage < 30 %}var(--success)
+        {% elif report.plagiarism_percentage < 60 %}var(--warn)
+        {% else %}var(--danger){% endif %};"
+      >
+        {{ report.plagiarism_percentage }}%
+      </div>
+      <div class="stat-label">Plagiarism Score</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ report.threshold }}%</div>
+      <div class="stat-label">Threshold</div>
+    </div>
+    <div class="stat-card">
+      <div
+        class="stat-value"
+        style="color:{% if report.passed %}var(--success){% else %}var(--danger){% endif %};"
+      >
+        {% if report.passed %}Pass{% else %}Fail{% endif %}
+      </div>
+      <div class="stat-label">Result</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ report.matches|length }}</div>
+      <div class="stat-label">Matched Submissions</div>
+    </div>
+  </div>
+
+  <!-- Score bar -->
+  <div class="card" style="margin-bottom: 24px">
+    <div class="flex items-center justify-between" style="margin-bottom: 10px">
+      <div style="font-weight: 600">Overall Similarity</div>
+      <div
+        style="font-size:20px;font-weight:700;color:
+        {% if report.plagiarism_percentage < 30 %}var(--success)
+        {% elif report.plagiarism_percentage < 60 %}var(--warn)
+        {% else %}var(--danger){% endif %};"
+      >
+        {{ report.plagiarism_percentage }}%
+      </div>
+    </div>
+    <div class="score-bar" style="height: 10px">
+      <div
+        class="score-fill {% if report.plagiarism_percentage < 30 %}score-low {% elif report.plagiarism_percentage < 60 %}score-mid {% else %}score-high{% endif %}"
+        style="width:{{ [report.plagiarism_percentage, 100]|min }}%;"
+      ></div>
+    </div>
+    <div class="flex justify-between text-sm text-muted mt-4">
+      <span>0%</span>
+      <span style="color: var(--danger)"
+        >Threshold: {{ report.threshold }}%</span
+      >
+      <span>100%</span>
+    </div>
+    {% if not report.passed %}
+    <div class="alert alert-error" style="margin-top: 12px; margin-bottom: 0">
+      <strong>High Plagiarism Detected.</strong> This submission exceeds the {{
+      report.threshold }}% threshold and has been automatically flagged.
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Student vs Student matches -->
+  {% if report.matches %}
+  <div class="card" style="margin-bottom: 24px">
+    <div class="card-title">Student vs Student Matches</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Student</th>
+            <th>Similarity</th>
+            <th>Visual</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for match in report.matches|sort(attribute='similarity',
+          reverse=True) %}
+          <tr>
+            <td class="font-mono">{{ match.filename }}</td>
+            <td>{{ match.user_name }}</td>
+            <td>
+              <span
+                style="font-weight:600;color:
+                {% if match.similarity < 30 %}var(--success)
+                {% elif match.similarity < 60 %}var(--warn)
+                {% else %}var(--danger){% endif %};"
+              >
+                {{ match.similarity }}%
+              </span>
+            </td>
+            <td style="min-width: 120px">
+              <div class="score-bar">
+                <div
+                  class="score-fill {% if match.similarity < 30 %}score-low {% elif match.similarity < 60 %}score-mid {% else %}score-high{% endif %}"
+                  style="width:{{ [match.similarity, 100]|min }}%;"
+                ></div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="card" style="margin-bottom: 24px">
+    <div class="card-title">Student vs Student Matches</div>
+    <div class="empty" style="padding: 24px">
+      <p>No significant matches found against other submissions.</p>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Web search results -->
+  <div class="card" style="margin-bottom: 24px">
+    <div class="card-title">Web Search — Top Results</div>
+    <p style="font-size: 13px; color: var(--text-2); margin-bottom: 16px">
+      Google search was performed using the first 20 natural words of the
+      submission.
+    </p>
+    {% if report.external_sources %}
+    <div style="display: flex; flex-direction: column; gap: 16px">
+      {% for source in report.external_sources %}
+      <div
+        style="
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          padding: 14px 16px;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+          "
+        >
+          <div style="flex: 1; min-width: 0">
+            <a
+              href="{{ source.url }}"
+              target="_blank"
+              rel="noopener"
+              style="
+                font-weight: 600;
+                color: var(--accent);
+                text-decoration: none;
+                font-size: 14px;
+                display: block;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              "
+            >
+              {{ source.title }}
+            </a>
+            <div
+              style="
+                font-size: 11px;
+                color: var(--text-3);
+                margin: 2px 0 6px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              "
+            >
+              {{ source.url }}
+            </div>
+            {% if source.snippet %}
+            <p
+              style="
+                font-size: 13px;
+                color: var(--text-2);
+                margin: 0;
+                line-height: 1.5;
+              "
+            >
+              {{ source.snippet }}…
+            </p>
+            {% endif %}
+          </div>
+          <span
+            style="
+              flex-shrink: 0;
+              font-size: 11px;
+              font-weight: 600;
+              background: var(--accent-bg);
+              color: var(--accent);
+              border-radius: 4px;
+              padding: 2px 8px;
+            "
+            >{{ loop.index }}</span
+          >
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty" style="padding: 24px">
+      <p>
+        No web results found — search query may be too short or search is
+        unavailable.
+      </p>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="text-sm text-muted">Checked at: {{ report.checked_at }}</div>
+
+  {% else %}
+  <div class="card">
+    <div class="alert alert-warn" style="margin: 0">
+      Plagiarism report not available. Run the plagiarism check first.
+    </div>
+    <div class="mt-16">
+      <a href="/teacher/plagiarism/{{ assignment.id }}" class="btn btn-primary"
+        >Run Check</a
+      >
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

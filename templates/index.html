@@ -1,152 +1,196 @@
-{% extends 'base.html' %} {% block title %}Home{% endblock %} {% block body %}
-
-<div class="container-fulid">
-  <div id="carouselExampleIndicators" class="carousel slide">
-    <div class="carousel-indicators">
-      <button
-        type="button"
-        data-bs-target="#carouselExampleIndicators"
-        data-bs-slide-to="0"
-        class="active"
-        aria-current="true"
-        aria-label="Slide 1"
-      ></button>
-      <button
-        type="button"
-        data-bs-target="#carouselExampleIndicators"
-        data-bs-slide-to="1"
-        aria-label="Slide 2"
-      ></button>
-      <button
-        type="button"
-        data-bs-target="#carouselExampleIndicators"
-        data-bs-slide-to="2"
-        aria-label="Slide 3"
-      ></button>
-    </div>
-    <div class="carousel-inner">
-      <div class="carousel-item active">
-        <div class="overlay">
-          <img
-            src="../static/Images/hero_1.jpg"
-            class="d-block w-100"
-            alt="hero_1"
-          />
-        </div>
-      </div>
-      <div class="carousel-item">
-        <div class="overlay">
-          <img
-            src="../static/Images/hero_2.jpeg"
-            class="d-block w-100"
-            alt="hero_2"
-          />
-        </div>
-      </div>
-      <div class="carousel-item">
-        <div class="overlay">
-          <img
-            src="../static/Images/hero_3.jpg"
-            class="d-block w-100"
-            alt="hero_3"
-          />
-        </div>
-      </div>
-    </div>
-    <button
-      class="carousel-control-prev"
-      type="button"
-      data-bs-target="#carouselExampleIndicators"
-      data-bs-slide="prev"
+{% extends "base.html" %} {% block title %}PlagCheck — Plagiarism Detection
+System{% endblock %} {% block extra_head %}
+<style>
+  .hero {
+    min-height: calc(100vh - 60px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 60px 24px;
+    background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent-bg);
+    color: var(--accent);
+    border: 1px solid #bfdbfe;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text);
+    max-width: 640px;
+    margin-bottom: 16px;
+  }
+  .hero h1 span {
+    color: var(--accent);
+  }
+  .hero p {
+    color: var(--text-2);
+    max-width: 520px;
+    font-size: 16px;
+    margin-bottom: 32px;
+    line-height: 1.7;
+  }
+  .hero-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .features {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 24px;
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+  }
+  .feature-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    background: var(--accent-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .feature-card h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .feature-card p {
+    color: var(--text-2);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+</style>
+{% endblock %} {% block content %}
+<section class="hero">
+  <div class="hero-badge">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
     >
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Previous</span>
-    </button>
-    <button
-      class="carousel-control-next"
-      type="button"
-      data-bs-target="#carouselExampleIndicators"
-      data-bs-slide="next"
-    >
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Next</span>
-    </button>
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </svg>
+    AI-Powered Academic Integrity Tool
   </div>
-  <div class="container mt-5">
-    <!-- Question 1 -->
-    <div class="d-flex flex-row justify-content-center my-3">
-      <div class="col-md-6">
-        <h2>What is plagiarism?</h2>
-        <p>
-          Plagiarism is the act of using someone else's work, ideas, or
-          intellectual property without giving proper credit.
-        </p>
-      </div>
-      <div class="col-md-3 ms-4">
-        <img
-          src="../static/Images/Plagiarism1.jpg"
-          alt="Plagiarism Image"
-          class="img-fluid"
-        />
-      </div>
-    </div>
-
-    <!-- Question 2 -->
-    <div class="d-flex flex-row-reverse justify-content-center my-3">
-      <div class="col-md-6">
-        <h2>Why is it important to avoid plagiarism?</h2>
-        <p>
-          Avoiding plagiarism is crucial to maintain academic integrity and
-          intellectual honesty. It ensures that credit is given where it's due.
-        </p>
-      </div>
-      <div class="col-md-3 me-4">
-        <img
-          src="../static/Images/Plagiarism2.jpg"
-          alt="Importance of Avoiding Plagiarism"
-          class="img-fluid"
-        />
-      </div>
-    </div>
-
-    <!-- Question 3 -->
-    <div class="d-flex flex-row justify-content-center my-3">
-      <div class="col-md-6">
-        <h2>How does our plagiarism checker work?</h2>
-        <p>
-          Our plagiarism checker uses advanced algorithms to compare your text
-          with a vast database of academic and online content to identify
-          similarities.
-        </p>
-      </div>
-      <div class="col-md-3 ms-4">
-        <img
-          src="../static/Images/Plagiarism3.png"
-          alt="Plagiarism Checker"
-          class="img-fluid"
-        />
-      </div>
-    </div>
-
-    <!-- Question 4 -->
-    <div class="d-flex flex-row-reverse justify-content-center my-3">
-      <div class="col-md-6">
-        <h2>What types of files can our plagiarism checker analyze?</h2>
-        <p>
-          Our plagiarism checker can analyze various types of files, including
-          word document, pdf file & text files.
-        </p>
-      </div>
-      <div class="col-md-3 me-4">
-        <img
-          src="../static/Images/Plagiarism4.png"
-          alt="Types of Documents"
-          class="img-fluid"
-        />
-      </div>
-    </div>
-
-    <!-- Repeat similar structure for other questions -->
+  <h1>Detect Plagiarism with <span>Confidence</span></h1>
+  <p>
+    A complete assignment management platform for teachers and students — with
+    built-in TF-IDF plagiarism detection, grading, and secure role-based access.
+  </p>
+  <div class="hero-actions">
+    <a href="/login" class="btn btn-primary btn-lg">Get Started</a>
+    <a href="/register" class="btn btn-secondary btn-lg">Create Account</a>
   </div>
-</div>
+</section>
+
+<section class="features">
+  <div class="feature-card">
+    <div class="feature-icon">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+      </svg>
+    </div>
+    <h3>Assignment Management</h3>
+    <p>
+      Teachers create and manage assignments with file uploads, due dates, and
+      per-course controls.
+    </p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+    </div>
+    <h3>TF-IDF Plagiarism Detection</h3>
+    <p>
+      Advanced cosine similarity analysis compares submissions against
+      classmates and external sources.
+    </p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <polyline points="9 11 12 14 22 4" />
+        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+      </svg>
+    </div>
+    <h3>Automated Grading</h3>
+    <p>
+      Assignments exceeding the plagiarism threshold are automatically flagged
+      and zero-graded.
+    </p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+        <path d="M7 11V7a5 5 0 0110 0v4" />
+      </svg>
+    </div>
+    <h3>Role-Based Access</h3>
+    <p>
+      Strict separation between students, teachers, and admins with JWT cookie
+      authentication.
+    </p>
+  </div>
+</section>
 {% endblock %}

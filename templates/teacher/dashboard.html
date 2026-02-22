@@ -1,0 +1,194 @@
+{% extends "base.html" %} {% block title %}Teacher Dashboard — PlagCheck{%
+endblock %} {% block content %}
+<div class="page">
+  <div class="page-header">
+    <h1>Dashboard</h1>
+    <p>
+      Course: <strong>{{ current_user.Course }}</strong> — {{ current_user.Fname
+      }} {{ current_user.Lname or '' }}
+    </p>
+  </div>
+
+  {% if request.query_params.get('uploaded') %}
+  <div class="alert alert-success">
+    Assignment question uploaded successfully.
+  </div>
+  {% endif %} {% if request.query_params.get('due_date_set') %}
+  <div class="alert alert-success">Due date updated successfully.</div>
+  {% endif %} {% if request.query_params.get('deleted_all') %}
+  <div class="alert alert-warn">All submissions deleted.</div>
+  {% endif %} {% if request.query_params.get('graded') %}
+  <div class="alert alert-success">Assignment graded successfully.</div>
+  {% endif %} {% if request.query_params.get('error') %}
+  <div class="alert alert-error">{{ request.query_params.get('error') }}</div>
+  {% endif %}
+
+  <!-- Stats -->
+  <div class="card-grid" style="margin-bottom: 24px">
+    <div class="stat-card">
+      <div class="stat-value">{{ total_assignments }}</div>
+      <div class="stat-label">Total Submissions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value text-success">{{ checked_assignments }}</div>
+      <div class="stat-label">Checked</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value text-warn">{{ unchecked_assignments }}</div>
+      <div class="stat-label">Unchecked</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">
+        {% if due_date and due_date.due_date %}{{ due_date.due_date.strftime('%b
+        %d') }}{% else %}—{% endif %}
+      </div>
+      <div class="stat-label">Due Date</div>
+    </div>
+  </div>
+
+  <div
+    style="
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    "
+  >
+    <!-- Assignment file -->
+    <div class="card">
+      <div class="card-title">Assignment File</div>
+      {% if question_file %}
+      <div class="alert alert-success" style="margin-bottom: 16px">
+        Current: <strong class="font-mono">{{ question_file.filename }}</strong>
+        <br /><span class="text-sm"
+          >Threshold: {{ question_file.plagiarism_threshold }}%</span
+        >
+      </div>
+      {% else %}
+      <div class="alert alert-warn" style="margin-bottom: 16px">
+        No assignment file uploaded yet.
+      </div>
+      {% endif %}
+      <a href="/teacher/create-assignment" class="btn btn-primary btn-sm">
+        {% if question_file %}Update Question File{% else %}Upload Question
+        File{% endif %}
+      </a>
+    </div>
+
+    <!-- Due date -->
+    <div class="card">
+      <div class="card-title">Due Date</div>
+      <form method="post" action="/teacher/update-due-date">
+        <div class="form-group">
+          <label class="form-label" for="due_date">Set Due Date & Time</label>
+          <input
+            id="due_date"
+            name="due_date"
+            type="datetime-local"
+            class="form-control"
+            value="{{ due_date.due_date.strftime('%Y-%m-%dT%H:%M') if due_date and due_date.due_date else '' }}"
+          />
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">
+          Update Due Date
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Recent submissions preview -->
+  <div class="card">
+    <div class="flex items-center justify-between mb-16">
+      <div class="card-title" style="margin-bottom: 0">Recent Submissions</div>
+      <a href="/teacher/submissions" class="btn btn-secondary btn-sm"
+        >View All →</a
+      >
+    </div>
+    {% if assignments %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>File</th>
+            <th>Submitted</th>
+            <th>Status</th>
+            <th>Plagiarism</th>
+            <th>Grade</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in assignments[:5] %}
+          <tr>
+            <td>{{ a.user.Fname }} {{ a.user.Lname or '' }}</td>
+            <td class="font-mono">{{ a.filename }}</td>
+            <td class="text-sm text-muted">
+              {{ a.timeuploaded.strftime('%b %d') if a.timeuploaded else '—' }}
+            </td>
+            <td>
+              {% if a.status.value == 'Checked' %}
+              <span class="status status-checked">Checked</span>
+              {% elif a.status.value == 'Pending' %}
+              <span class="status status-pending">Pending</span>
+              {% else %}
+              <span class="status status-not-checked">Unchecked</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if a.plagiarism_percentage is not none %}
+              <span
+                style="font-weight:600;color:
+                  {% if a.plagiarism_percentage < 30 %}var(--success)
+                  {% elif a.plagiarism_percentage < 60 %}var(--warn)
+                  {% else %}var(--danger){% endif %};"
+              >
+                {{ a.plagiarism_percentage }}%
+              </span>
+              {% else %}—{% endif %}
+            </td>
+            <td>
+              {% if a.obtmarks is not none %}{{ a.obtmarks }}/{{ a.totalmarks
+              }}{% else %}—{% endif %}
+            </td>
+            <td>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap">
+                <a
+                  href="/teacher/plagiarism/{{ a.id }}"
+                  class="btn btn-secondary btn-sm"
+                  >Check</a
+                >
+                <a
+                  href="/teacher/grade/{{ a.id }}"
+                  class="btn btn-secondary btn-sm"
+                  >Grade</a
+                >
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty">
+      <svg
+        width="36"
+        height="36"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+      >
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+      </svg>
+      <p>
+        No submissions yet for course
+        <strong>{{ current_user.Course }}</strong>.
+      </p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

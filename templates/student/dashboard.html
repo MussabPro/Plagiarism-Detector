@@ -1,0 +1,192 @@
+{% extends "base.html" %} {% block title %}Student Dashboard — PlagCheck{%
+endblock %} {% block content %}
+<div class="page">
+  <div class="page-header">
+    <h1>Welcome, {{ current_user.Fname }}</h1>
+    <p>Course: <strong>{{ current_user.Course }}</strong></p>
+  </div>
+
+  {% if request.query_params.get('submitted') %}
+  <div class="alert alert-success">
+    Your assignment was submitted successfully.
+  </div>
+  {% endif %} {% if request.query_params.get('error') %}
+  <div class="alert alert-error">{{ request.query_params.get('error') }}</div>
+  {% endif %}
+
+  <!-- Stats row -->
+  <div class="card-grid" style="margin-bottom: 24px">
+    <div class="stat-card">
+      <div class="stat-value">{{ total_assignments }}</div>
+      <div class="stat-label">Submissions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">
+        {% if due_date and due_date.due_date %} {{
+        due_date.due_date.strftime('%b %d') }} {% else %} — {% endif %}
+      </div>
+      <div class="stat-label">Due Date</div>
+    </div>
+    <div class="stat-card">
+      <div
+        class="stat-value"
+        style="color: {% if is_due_date_passed %}var(--danger){% else %}var(--success){% endif %};"
+      >
+        {% if is_due_date_passed %}Closed{% else %}Open{% endif %}
+      </div>
+      <div class="stat-label">Submission Status</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">
+        {% if assignments and assignments[0].plagiarism_percentage is not none
+        %} {{ assignments[0].plagiarism_percentage }}% {% else %}—{% endif %}
+      </div>
+      <div class="stat-label">Last Plagiarism Score</div>
+    </div>
+  </div>
+
+  <div style="display: grid; gap: 24px; grid-template-columns: 1fr 1fr">
+    <!-- Download & Submit card -->
+    <div class="card">
+      <div class="card-title">Assignment</div>
+      {% if question_file %}
+      <p class="text-sm text-muted mb-16">
+        <strong>{{ question_file.filename }}</strong> is available for download.
+      </p>
+      <a
+        href="/download-assignment-question/{{ current_user.Course }}"
+        class="btn btn-secondary btn-sm"
+        style="margin-bottom: 16px"
+      >
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        Download Question
+      </a>
+      {% else %}
+      <div class="alert alert-info" style="margin-bottom: 16px">
+        No assignment has been posted yet.
+      </div>
+      {% endif %}
+
+      <hr />
+
+      <div class="card-title" style="margin-top: 16px">Submit Your Answer</div>
+      {% if is_due_date_passed %}
+      <div class="alert alert-error">
+        The due date has passed. Submissions are closed.
+      </div>
+      {% else %}
+      <form
+        method="post"
+        action="/student/submit"
+        enctype="multipart/form-data"
+      >
+        <div class="form-group">
+          <label class="form-label" for="file"
+            >Upload File (.txt, .pdf, .docx)</label
+          >
+          <input
+            id="file"
+            name="file"
+            type="file"
+            class="form-control"
+            accept=".txt,.pdf,.docx"
+            required
+          />
+          <div class="form-hint">Max 16 MB</div>
+        </div>
+        <button type="submit" class="btn btn-primary">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+          Submit Assignment
+        </button>
+      </form>
+      {% endif %}
+    </div>
+
+    <!-- Submissions list -->
+    <div class="card">
+      <div class="card-title">My Submissions</div>
+      {% if assignments %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>Submitted</th>
+              <th>Status</th>
+              <th>Grade</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in assignments %}
+            <tr>
+              <td class="font-mono">{{ a.filename }}</td>
+              <td class="text-sm text-muted">
+                {{ a.timeuploaded.strftime('%b %d, %H:%M') if a.timeuploaded
+                else '—' }}
+              </td>
+              <td>
+                {% if a.status.value == 'Checked' %}
+                <span class="status status-checked">Checked</span>
+                {% elif a.status.value == 'Pending' %}
+                <span class="status status-pending">Pending</span>
+                {% else %}
+                <span class="status status-not-checked">Not Checked</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if a.obtmarks is not none %} {{ a.obtmarks }}/{{ a.totalmarks
+                }} {% else %}—{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty">
+        <svg
+          width="40"
+          height="40"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+        </svg>
+        <p>No submissions yet.</p>
+      </div>
+      {% endif %} {% if assignments %}
+      <div class="mt-16">
+        <a href="/student/result" class="btn btn-secondary btn-sm"
+          >View Full Results →</a
+        >
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

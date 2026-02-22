@@ -1,109 +1,152 @@
-{% extends 'base.html' %} {% block title %}Login{% endblock %} {% block body %}
-<div class="container">
-  <div class="row justify-content-center align-items-center min-vh-100">
-    <div class="col-12 col-sm-8 col-md-6 col-lg-4">
-      <div class="card p-4 shadow">
-        <h2 class="text-center font-weight-bold mb-4">Login</h2>
-        <form action="/login" method="post" class="needs-validation" novalidate>
-          <div class="form-group">
-            <div class="col-md-full">
-              <label for="validationCustomUsername" class="form-label"
-                >Username</label
-              >
-              <div class="input-group has-validation">
-                <span class="input-group-text" id="inputGroupPrepend">@</span>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="validationCustomUsername"
-                  aria-describedby="inputGroupPrepend"
-                  placeholder="Username..."
-                  name="username"
-                  required
-                />
-                <div class="invalid-feedback">
-                  Please enter a vaild username.
-                </div>
-              </div>
-            </div>
-            <label for="inputPassword5" class="form-label">Password</label>
-            <div class="input-group has-validation">
-              <span class="input-group-text" id="inputGroupPrepend">
-                <i class="fa-solid fa-lock"></i>
-              </span>
-              <input
-                type="password"
-                id="inputPassword5"
-                class="form-control"
-                placeholder="Password..."
-                aria-describedby="passwordHelpBlock"
-                name="password"
-                required
-              />
-              <button
-                type="button"
-                class="btn btn-outline-secondary"
-                onclick="togglePasswordVisibility('inputPassword5')"
-              >
-                <i class="fa-solid fa-eye"></i>
-              </button>
-              <div class="invalid-feedback">Please enter password.</div>
-            </div>
-            <div class="my-2">
-              <a href="/register">Create an Account.</a>
-            </div>
-            {% if error_message != "" %}
-            <div class="invalid-feedback" style="display: block !important">
-              {{ error_message }}
-            </div>
-            {% endif %}
+{% extends "base.html" %} {% block title %}Login — PlagCheck{% endblock %} {%
+block extra_head %}
+<style>
+  .auth-wrap {
+    min-height: calc(100vh - 60px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+    background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+  }
+  .auth-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    width: 100%;
+    max-width: 420px;
+    padding: 36px;
+  }
+  .auth-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+  .auth-logo svg {
+    color: var(--accent);
+  }
+  .auth-logo span {
+    font-weight: 700;
+    font-size: 18px;
+  }
+  .auth-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .auth-sub {
+    color: var(--text-2);
+    margin-bottom: 24px;
+    font-size: 14px;
+  }
 
-            <div class="d-flex flex-row justify-content-center mt-3">
-              <button type="submit" class="btn btn-outline-primary">
-                Sign In
-              </button>
-            </div>
-          </div>
-        </form>
+  .role-tabs {
+    display: flex;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+    margin-bottom: 22px;
+  }
+  .role-tab {
+    flex: 1;
+    text-align: center;
+    padding: 7px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-2);
+    transition: all 0.15s;
+  }
+  .role-tab.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+  }
+  .auth-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--text-2);
+  }
+  .auth-footer a {
+    color: var(--accent);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .auth-footer a:hover {
+    text-decoration: underline;
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path
+          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+        />
+      </svg>
+      <span>PlagCheck</span>
+    </div>
+
+    <h1 class="auth-title">Welcome back</h1>
+    <p class="auth-sub">Log in to your account to continue.</p>
+
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %} {% if request.query_params.get('registered') %}
+    <div class="alert alert-success">Account created. Please log in.</div>
+    {% endif %} {% if request.query_params.get('timeout') %}
+    <div class="alert alert-warn">Session expired. Please log in again.</div>
+    {% endif %}
+
+    <form method="post" action="/login">
+      <div class="form-group">
+        <label class="form-label" for="username">Username <span>*</span></label>
+        <input
+          id="username"
+          name="username"
+          type="text"
+          class="form-control"
+          placeholder="Enter your username"
+          required
+          autocomplete="username"
+        />
       </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Password <span>*</span></label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          class="form-control"
+          placeholder="Enter your password"
+          required
+          autocomplete="current-password"
+        />
+      </div>
+      <button
+        type="submit"
+        class="btn btn-primary btn-block"
+        style="margin-top: 4px"
+      >
+        Log In
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      Don't have an account? <a href="/register">Register here</a>
     </div>
   </div>
 </div>
-<script>
-  // Example starter JavaScript for disabling form submissions if there are invalid fields
-  function togglePasswordVisibility(inputId) {
-    const passwordInput = document.getElementById(inputId);
-    const button = passwordInput.nextElementSibling;
-
-    if (passwordInput.type === "password") {
-      passwordInput.type = "text";
-      button.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
-    } else {
-      passwordInput.type = "password";
-      button.innerHTML = '<i class="fa-solid fa-eye"></i>';
-    }
-  }
-  (() => {
-    "use strict";
-
-    // Fetch all the forms we want to apply custom Bootstrap validation styles to
-    const forms = document.querySelectorAll(".needs-validation");
-
-    // Loop over them and prevent submission
-    Array.from(forms).forEach((form) => {
-      form.addEventListener(
-        "submit",
-        (event) => {
-          if (!form.checkValidity()) {
-            event.preventDefault();
-            event.stopPropagation();
-          }
-
-          form.classList.add("was-validated");
-        },
-        false
-      );
-    });
-  })();
-</script>
 {% endblock %}

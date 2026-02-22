@@ -1,0 +1,156 @@
+{% extends "base.html" %} {% block title %}My Results — PlagCheck{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-header">
+    <h1>My Results</h1>
+    <p>Plagiarism scores and grades for your submissions.</p>
+  </div>
+
+  {% if not assignments %}
+  <div class="card">
+    <div class="empty">
+      <svg
+        width="40"
+        height="40"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+      <p>No results available yet. Submit an assignment first.</p>
+    </div>
+  </div>
+  {% else %} {% for a in assignments %}
+  <div class="card" style="margin-bottom: 16px">
+    <div class="flex items-center justify-between mb-16">
+      <div>
+        <div class="font-mono" style="font-weight: 600">{{ a.filename }}</div>
+        <div class="text-sm text-muted mt-4">
+          Submitted: {{ a.timeuploaded.strftime('%B %d, %Y at %H:%M') if
+          a.timeuploaded else '—' }}
+        </div>
+      </div>
+      <div style="text-align: right">
+        {% if a.status.value == 'Checked' %}
+        <span class="status status-checked">Checked</span>
+        {% elif a.status.value == 'Pending' %}
+        <span class="status status-pending">Pending</span>
+        {% else %}
+        <span class="status status-not-checked">Not Checked</span>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if a.status.value == 'Checked' %}
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px">
+      <!-- Plagiarism score -->
+      <div>
+        <div class="section-title">Plagiarism Score</div>
+        {% if a.plagiarism_percentage is not none %}
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+          "
+        >
+          <div
+            style="font-size:24px;font-weight:700;color:
+            {% if a.plagiarism_percentage < 30 %}var(--success)
+            {% elif a.plagiarism_percentage < 60 %}var(--warn)
+            {% else %}var(--danger){% endif %};"
+          >
+            {{ a.plagiarism_percentage }}%
+          </div>
+          <div class="text-sm text-muted">similarity detected</div>
+        </div>
+        <div class="score-bar">
+          <div
+            class="score-fill {% if a.plagiarism_percentage < 30 %}score-low {% elif a.plagiarism_percentage < 60 %}score-mid {% else %}score-high{% endif %}"
+            style="width: {{ [a.plagiarism_percentage, 100]|min }}%;"
+          ></div>
+        </div>
+        {% if a.auto_graded %}
+        <div
+          class="alert alert-error"
+          style="margin-top: 10px; font-size: 13px"
+        >
+          Automatically graded zero due to high plagiarism.
+        </div>
+        {% endif %} {% else %}
+        <p class="text-muted text-sm">Plagiarism report not available.</p>
+        {% endif %}
+      </div>
+
+      <!-- Grade -->
+      <div>
+        <div class="section-title">Grade</div>
+        {% if a.obtmarks is not none %}
+        <div
+          style="font-size:24px;font-weight:700;color:
+          {% if a.obtmarks / a.totalmarks >= 0.5 %}var(--success){% else %}var(--danger){% endif %};"
+        >
+          {{ a.obtmarks }} / {{ a.totalmarks }}
+        </div>
+        {% if a.comment %}
+        <p class="text-sm text-muted mt-8">{{ a.comment }}</p>
+        {% endif %} {% else %}
+        <p class="text-muted text-sm">Not graded yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Plagiarism matches detail -->
+    {% if a.plagiarism_report and a.plagiarism_report.get('matches') %}
+    <hr style="margin: 16px 0" />
+    <div class="section-title">Similarity Matches</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Matched File</th>
+            <th>Student</th>
+            <th>Similarity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for match in a.plagiarism_report.matches %}
+          <tr>
+            <td class="font-mono">{{ match.filename }}</td>
+            <td>{{ match.user_name }}</td>
+            <td>
+              <span
+                style="font-weight:600;color:
+                {% if match.similarity < 30 %}var(--success)
+                {% elif match.similarity < 60 %}var(--warn)
+                {% else %}var(--danger){% endif %};"
+              >
+                {{ match.similarity }}%
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %} {% else %}
+    <div class="alert alert-info" style="margin: 0">
+      Your submission has not been checked yet. Check back after your teacher
+      runs the plagiarism analysis.
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %} {% endif %}
+
+  <div class="mt-16">
+    <a href="/student/dashboard" class="btn btn-secondary"
+      >← Back to Dashboard</a
+    >
+  </div>
+</div>
+{% endblock %}

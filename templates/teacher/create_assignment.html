@@ -1,0 +1,148 @@
+{% extends "base.html" %} {% block title %}Create Assignment — PlagCheck{%
+endblock %} {% block content %}
+<div class="page-md">
+  <div class="page-header">
+    <h1>Create Assignment</h1>
+    <p>
+      Upload a question file and configure plagiarism settings for
+      <strong>{{ current_user.Course }}</strong>.
+    </p>
+  </div>
+
+  {% if question_file %}
+  <div class="alert alert-info" style="margin-bottom: 20px">
+    <strong>Current file:</strong>
+    <span class="font-mono">{{ question_file.filename }}</span>
+    (uploaded {{ question_file.created_at.strftime('%b %d, %Y') if
+    question_file.created_at else '' }}). Submitting this form will replace it.
+  </div>
+  {% endif %} {% if request.query_params.get('error') %}
+  <div class="alert alert-error">{{ request.query_params.get('error') }}</div>
+  {% endif %}
+
+  <div class="card">
+    <form
+      method="post"
+      action="/teacher/upload-question"
+      enctype="multipart/form-data"
+    >
+      <div class="form-group">
+        <label class="form-label" for="file"
+          >Question File <span>*</span></label
+        >
+        <input
+          id="file"
+          name="file"
+          type="file"
+          class="form-control"
+          accept=".txt,.pdf,.docx"
+          required
+        />
+        <div class="form-hint">Accepted: .txt, .pdf, .docx — max 16 MB</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="threshold"
+            >Plagiarism Threshold (%)</label
+          >
+          <input
+            id="threshold"
+            name="plagiarism_threshold"
+            type="number"
+            class="form-control"
+            min="0"
+            max="100"
+            step="0.5"
+            value="{{ question_file.plagiarism_threshold if question_file else 40 }}"
+          />
+          <div class="form-hint">
+            Submissions above this % are auto-flagged.
+          </div>
+        </div>
+        <div
+          class="form-group"
+          style="
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+          "
+        >
+          <label
+            class="form-label"
+            for="include_refs"
+            style="
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              cursor: pointer;
+            "
+          >
+            <input
+              id="include_refs"
+              name="include_references"
+              type="checkbox"
+              {%
+              if
+              not
+              question_file
+              or
+              question_file.include_references
+              %}checked{%
+              endif
+              %}
+              style="width: 16px; height: 16px"
+            />
+            Include References in Analysis
+          </label>
+          <div class="form-hint" style="margin-top: 6px">
+            Uncheck to ignore reference sections.
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 8px">
+        <button type="submit" class="btn btn-primary">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+          Upload Assignment
+        </button>
+        <a href="/teacher/dashboard" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Due date quick set -->
+  <div class="card" style="margin-top: 20px">
+    <div class="card-title">Set Due Date</div>
+    <form method="post" action="/teacher/update-due-date">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="due_date">Due Date &amp; Time</label>
+          <input
+            id="due_date"
+            name="due_date"
+            type="datetime-local"
+            class="form-control"
+            value="{{ due_date.due_date.strftime('%Y-%m-%dT%H:%M') if due_date and due_date.due_date else '' }}"
+          />
+          <div class="form-hint">Leave blank to remove the due date.</div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">
+        Save Due Date
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

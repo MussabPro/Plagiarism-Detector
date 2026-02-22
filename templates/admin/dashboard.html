@@ -1,0 +1,157 @@
+{% extends "base.html" %} {% block title %}Admin Dashboard — PlagCheck{%
+endblock %} {% block content %}
+<div class="page">
+  <div class="page-header">
+    <h1>Admin Dashboard</h1>
+    <p>Manage users and system settings.</p>
+  </div>
+
+  {% if request.query_params.get('deleted') %}
+  <div class="alert alert-warn">User deleted successfully.</div>
+  {% endif %} {% if request.query_params.get('updated') %}
+  <div class="alert alert-success">User updated successfully.</div>
+  {% endif %} {% if request.query_params.get('reset') %}
+  <div class="alert alert-success">Password reset successfully.</div>
+  {% endif %} {% if request.query_params.get('error') %}
+  <div class="alert alert-error">{{ request.query_params.get('error') }}</div>
+  {% endif %}
+
+  <!-- Stats -->
+  <div class="card-grid" style="margin-bottom: 24px">
+    <div class="stat-card">
+      <div class="stat-value">{{ total_users }}</div>
+      <div class="stat-label">Total Users</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color: var(--accent)">
+        {{ student_count }}
+      </div>
+      <div class="stat-label">Students</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color: var(--success)">
+        {{ teacher_count }}
+      </div>
+      <div class="stat-label">Teachers</div>
+    </div>
+  </div>
+
+  <!-- Users table -->
+  <div class="card">
+    <div class="flex items-center justify-between mb-16">
+      <div class="card-title" style="margin-bottom: 0">All Users</div>
+    </div>
+    {% if users %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Course</th>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td class="text-muted text-sm">{{ user.userid }}</td>
+            <td style="font-weight: 500">
+              {{ user.Fname }} {{ user.Lname or '' }}
+            </td>
+            <td class="font-mono">{{ user.username }}</td>
+            <td class="text-sm text-muted">{{ user.email }}</td>
+            <td>{{ user.Course }}</td>
+            <td>
+              {% if user.role.value == 'Student' %}
+              <span class="badge badge-student">Student</span>
+              {% elif user.role.value == 'Teacher' %}
+              <span class="badge badge-teacher">Teacher</span>
+              {% else %}
+              <span class="badge badge-admin">Admin</span>
+              {% endif %}
+            </td>
+            <td>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap">
+                <a
+                  href="/admin/update-user/{{ user.id }}"
+                  class="btn btn-secondary btn-sm"
+                  >Edit</a
+                >
+                <a
+                  href="/admin/reset-password/{{ user.id }}"
+                  class="btn btn-secondary btn-sm"
+                  >Reset PW</a
+                >
+                {% if user.role.value != 'Admin' %}
+                <form
+                  method="post"
+                  action="/admin/delete-user/{{ user.id }}"
+                  onsubmit="return confirm('Delete user {{ user.username }}?');"
+                  style="display: inline"
+                >
+                  <button type="submit" class="btn btn-danger btn-sm">
+                    Delete
+                  </button>
+                </form>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty"><p>No users found.</p></div>
+    {% endif %}
+  </div>
+
+  <!-- Admin password change -->
+  <div class="card" style="margin-top: 24px; max-width: 480px">
+    <div class="card-title">Change Admin Password</div>
+    <form method="post" action="/admin/change-password">
+      <div class="form-group">
+        <label class="form-label" for="old_password">Current Password</label>
+        <input
+          id="old_password"
+          name="old_password"
+          type="password"
+          class="form-control"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="new_password">New Password</label>
+        <input
+          id="new_password"
+          name="new_password"
+          type="password"
+          class="form-control"
+          required
+          minlength="8"
+        />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="confirm_password"
+          >Confirm New Password</label
+        >
+        <input
+          id="confirm_password"
+          name="confirm_password"
+          type="password"
+          class="form-control"
+          required
+          minlength="8"
+        />
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">
+        Update Password
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

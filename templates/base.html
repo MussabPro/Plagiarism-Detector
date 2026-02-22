@@ -1,104 +1,617 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Plagiarism Detector{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
-      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-      crossorigin="anonymous"
     />
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-      crossorigin="anonymous"
-    ></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
-    />
-    <link rel="icon" href="../static/icon.svg" type="image/x-icon" />
-    <title>{% block title %} {% endblock %} - Plagiarism Detection</title>
     <style>
-      .overlay {
-        filter: brightness(90%);
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #f8fafc;
+        --surface: #ffffff;
+        --border: #e2e8f0;
+        --text: #0f172a;
+        --text-2: #475569;
+        --text-3: #94a3b8;
+        --accent: #3b82f6;
+        --accent-h: #2563eb;
+        --accent-bg: #eff6ff;
+        --success: #10b981;
+        --success-bg: #ecfdf5;
+        --warn: #f59e0b;
+        --warn-bg: #fffbeb;
+        --danger: #ef4444;
+        --danger-bg: #fef2f2;
+        --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --radius: 8px;
+        --radius-sm: 5px;
+        --nav-h: 60px;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        font-size: 14px;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      /* ── Nav ── */
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        height: var(--nav-h);
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        padding: 0 24px;
+        gap: 16px;
+      }
+      .nav-brand {
+        font-weight: 700;
+        font-size: 16px;
+        color: var(--text);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      .nav-brand svg {
+        color: var(--accent);
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex: 1;
+        list-style: none;
+      }
+      .nav-links a {
+        text-decoration: none;
+        color: var(--text-2);
+        font-weight: 500;
+        padding: 6px 12px;
+        border-radius: var(--radius-sm);
+        transition:
+          background 0.15s,
+          color 0.15s;
+        white-space: nowrap;
+      }
+      .nav-links a:hover,
+      .nav-links a.active {
+        background: var(--accent-bg);
+        color: var(--accent);
+      }
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-left: auto;
+        flex-shrink: 0;
+      }
+      .nav-user {
+        font-weight: 500;
+        color: var(--text-2);
+      }
+      .badge {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 20px;
+      }
+      .badge-student {
+        background: var(--accent-bg);
+        color: var(--accent);
+      }
+      .badge-teacher {
+        background: #f0fdf4;
+        color: #16a34a;
+      }
+      .badge-admin {
+        background: #fdf4ff;
+        color: #9333ea;
+      }
+
+      /* ── Layout ── */
+      .page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 32px 24px;
+      }
+      .page-sm {
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 48px 24px;
+      }
+      .page-md {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 40px 24px;
+      }
+
+      /* ── Page header ── */
+      .page-header {
+        margin-bottom: 28px;
+      }
+      .page-header h1 {
+        font-size: 22px;
+        font-weight: 700;
+      }
+      .page-header p {
+        color: var(--text-2);
+        margin-top: 4px;
+      }
+
+      /* ── Cards ── */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 24px;
+      }
+      .card-title {
+        font-weight: 600;
+        font-size: 15px;
+        margin-bottom: 16px;
+      }
+      .card-grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      }
+      .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+        box-shadow: var(--shadow);
+      }
+      .stat-card .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+      }
+      .stat-card .stat-label {
+        color: var(--text-2);
+        font-size: 13px;
+        margin-top: 2px;
+      }
+
+      /* ── Buttons ── */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 18px;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-weight: 500;
+        font-family: inherit;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        transition:
+          background 0.15s,
+          opacity 0.15s;
+        white-space: nowrap;
+      }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: var(--accent-h);
+      }
+      .btn-secondary {
+        background: var(--bg);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      .btn-secondary:hover {
+        background: var(--border);
+      }
+      .btn-danger {
+        background: var(--danger-bg);
+        color: var(--danger);
+        border: 1px solid #fecaca;
+      }
+      .btn-danger:hover {
+        background: #fee2e2;
+      }
+      .btn-success {
+        background: var(--success-bg);
+        color: var(--success);
+        border: 1px solid #a7f3d0;
+      }
+      .btn-success:hover {
+        background: #d1fae5;
+      }
+      .btn-sm {
+        padding: 5px 12px;
+        font-size: 13px;
+      }
+      .btn-lg {
+        padding: 12px 24px;
+        font-size: 15px;
+      }
+      .btn-block {
+        width: 100%;
+        justify-content: center;
+      }
+
+      /* ── Forms ── */
+      .form-group {
+        margin-bottom: 18px;
+      }
+      .form-label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: var(--text);
+      }
+      .form-label span {
+        color: var(--danger);
+        margin-left: 2px;
+      }
+      .form-control {
+        width: 100%;
+        padding: 9px 12px;
+        font-size: 14px;
+        font-family: inherit;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        color: var(--text);
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+        outline: none;
+      }
+      .form-control:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+      }
+      .form-hint {
+        font-size: 12px;
+        color: var(--text-3);
+        margin-top: 4px;
+      }
+      .form-row {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      /* ── Table ── */
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      thead th {
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+        padding: 10px 14px;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-2);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      tbody tr {
+        border-bottom: 1px solid var(--border);
+        transition: background 0.1s;
+      }
+      tbody tr:last-child {
+        border-bottom: none;
+      }
+      tbody tr:hover {
+        background: var(--bg);
+      }
+      tbody td {
+        padding: 12px 14px;
+      }
+
+      /* ── Alerts ── */
+      .alert {
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        margin-bottom: 16px;
+        border: 1px solid transparent;
+      }
+      .alert-success {
+        background: var(--success-bg);
+        color: #065f46;
+        border-color: #a7f3d0;
+      }
+      .alert-error {
+        background: var(--danger-bg);
+        color: #991b1b;
+        border-color: #fecaca;
+      }
+      .alert-warn {
+        background: var(--warn-bg);
+        color: #92400e;
+        border-color: #fde68a;
+      }
+      .alert-info {
+        background: var(--accent-bg);
+        color: #1e40af;
+        border-color: #bfdbfe;
+      }
+
+      /* ── Status pills ── */
+      .status {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .status-checked {
+        background: var(--success-bg);
+        color: var(--success);
+      }
+      .status-not-checked {
+        background: var(--bg);
+        color: var(--text-2);
+        border: 1px solid var(--border);
+      }
+      .status-pending {
+        background: var(--warn-bg);
+        color: var(--warn);
+      }
+
+      /* ── Dividers ── */
+      hr {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 20px 0;
+      }
+      .section-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-2);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 12px;
+      }
+
+      /* ── Utilities ── */
+      .flex {
+        display: flex;
+      }
+      .items-center {
+        align-items: center;
+      }
+      .gap-8 {
+        gap: 8px;
+      }
+      .gap-12 {
+        gap: 12px;
+      }
+      .mt-4 {
+        margin-top: 4px;
+      }
+      .mt-8 {
+        margin-top: 8px;
+      }
+      .mt-16 {
+        margin-top: 16px;
+      }
+      .mt-24 {
+        margin-top: 24px;
+      }
+      .mb-16 {
+        margin-bottom: 16px;
+      }
+      .text-sm {
+        font-size: 13px;
+      }
+      .text-muted {
+        color: var(--text-2);
+      }
+      .text-right {
+        text-align: right;
+      }
+      .font-mono {
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+      }
+      .w-full {
+        width: 100%;
+      }
+      .justify-between {
+        justify-content: space-between;
+      }
+      .text-danger {
+        color: var(--danger);
+      }
+      .text-success {
+        color: var(--success);
+      }
+      .text-warn {
+        color: var(--warn);
+      }
+
+      /* ── Plagi score bar ── */
+      .score-bar {
+        height: 6px;
+        background: var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .score-fill {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.3s;
+      }
+      .score-low {
+        background: var(--success);
+      }
+      .score-mid {
+        background: var(--warn);
+      }
+      .score-high {
+        background: var(--danger);
+      }
+
+      /* ── Empty state ── */
+      .empty {
+        text-align: center;
+        padding: 48px 24px;
+        color: var(--text-2);
+      }
+      .empty svg {
+        margin: 0 auto 12px;
+        display: block;
+        opacity: 0.4;
+      }
+
+      /* ── Mobile ── */
+      @media (max-width: 640px) {
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+        .card-grid {
+          grid-template-columns: 1fr;
+        }
+        .nav-links {
+          display: none;
+        }
+        .page {
+          padding: 20px 16px;
+        }
+      }
+
+      /* ── Toggle tabs ── */
+      .tabs {
+        display: flex;
+        border-bottom: 2px solid var(--border);
+        margin-bottom: 24px;
+      }
+      .tab {
+        padding: 10px 20px;
+        font-weight: 500;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -2px;
+        color: var(--text-2);
+        font-size: 14px;
+      }
+      .tab.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
       }
     </style>
+    {% block extra_head %}{% endblock %}
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg bg-body-dark">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="/"
-          ><img
-            src="../static/icon.svg"
-            alt="Logo"
-            width="30"
-            height="24"
-            class="d-inline-block align-text-top"
+    {% if current_user is defined and current_user %}
+    <nav class="nav">
+      <a href="/" class="nav-brand">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
           />
-          Plagiarism Detector</a
-        >
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="/">Home</a>
-            </li>
-            {% if user %}
-            <li class="nav-item">
-              {% if user.role=="Student" %}
-              <a class="nav-link" href="/dashboard"> {{user.role}} Dashboard</a>
-              {% else %}
-              <a class="nav-link" href="/teacherdashboard">
-                {{user.role}} Dashboard</a
-              >
-              {% endif %}
-            </li>
-            {% endif %}
-          </ul>
-          <div
-            class="d-flex flex-row align-items-center justify-content-center"
-          >
-            {% if user %}
+        </svg>
+        PlagCheck
+      </a>
 
-            <a class="nav-link" href="/profile">
-              <i class="fa-solid fa-user-large"></i>
-              {{user.Fname}} {% if user.Lname %} {{user.Lname}} {% endif %}
-            </a>
-            {% else %}
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link" href="/login">
-                  <i class="fa-solid fa-user-large"></i>
-                  Login</a
-                >
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/register">
-                  <i
-                    class="fa-regular fa-pen-to-square"
-                    style="color: #000000"
-                  ></i>
-                  Register</a
-                >
-              </li>
-            </ul>
-            {% endif %}
-          </div>
-        </div>
+      {% if current_user.role.value == "Student" %}
+      <ul class="nav-links">
+        <li><a href="/student/dashboard">Dashboard</a></li>
+        <li><a href="/student/assignment">Assignment</a></li>
+        <li><a href="/student/result">My Result</a></li>
+      </ul>
+      {% elif current_user.role.value == "Teacher" %}
+      <ul class="nav-links">
+        <li><a href="/teacher/dashboard">Dashboard</a></li>
+        <li><a href="/teacher/create-assignment">Create Assignment</a></li>
+        <li><a href="/teacher/submissions">Submissions</a></li>
+      </ul>
+      {% elif current_user.role.value == "Admin" %}
+      <ul class="nav-links">
+        <li><a href="/admin/">Dashboard</a></li>
+      </ul>
+      {% endif %}
+
+      <div class="nav-right">
+        {% if current_user.role.value == "Student" %}
+        <span class="badge badge-student">Student</span>
+        {% elif current_user.role.value == "Teacher" %}
+        <span class="badge badge-teacher">Teacher</span>
+        {% else %}
+        <span class="badge badge-admin">Admin</span>
+        {% endif %}
+        <span class="nav-user">{{ current_user.Fname }}</span>
+        <a href="/logout" class="btn btn-secondary btn-sm">Log out</a>
       </div>
     </nav>
-    {% block body %} {% endblock %}
+    {% else %}
+    <nav class="nav">
+      <a href="/" class="nav-brand">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+          />
+        </svg>
+        PlagCheck
+      </a>
+      <div class="nav-right">
+        <a href="/login" class="btn btn-secondary btn-sm">Login</a>
+        <a href="/register" class="btn btn-primary btn-sm">Register</a>
+      </div>
+    </nav>
+    {% endif %}
+
+    <main>{% block content %}{% endblock %}</main>
   </body>
 </html>

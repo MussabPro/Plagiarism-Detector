@@ -1,0 +1,143 @@
+{% extends "base.html" %} {% block title %}Grade Assignment — PlagCheck{%
+endblock %} {% block content %}
+<div class="page-md">
+  <div class="page-header">
+    <h1>Grade Assignment</h1>
+    <p>Assign marks and feedback for this submission.</p>
+  </div>
+
+  <!-- Submission info -->
+  <div class="card" style="margin-bottom: 20px">
+    <div class="section-title">Submission Details</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+      <div>
+        <div class="text-sm text-muted">Student</div>
+        <div style="font-weight: 500; margin-top: 2px">
+          {{ assignment.user.Fname }} {{ assignment.user.Lname or '' }}
+        </div>
+      </div>
+      <div>
+        <div class="text-sm text-muted">File</div>
+        <div class="font-mono" style="margin-top: 2px">
+          {{ assignment.filename }}
+        </div>
+      </div>
+      <div>
+        <div class="text-sm text-muted">Submitted</div>
+        <div style="margin-top: 2px">
+          {{ assignment.timeuploaded.strftime('%B %d, %Y %H:%M') if
+          assignment.timeuploaded else '—' }}
+        </div>
+      </div>
+      <div>
+        <div class="text-sm text-muted">Plagiarism</div>
+        <div
+          style="margin-top:2px;font-weight:500;color:
+          {% if assignment.plagiarism_percentage is not none %}
+            {% if assignment.plagiarism_percentage < 30 %}var(--success)
+            {% elif assignment.plagiarism_percentage < 60 %}var(--warn)
+            {% else %}var(--danger){% endif %}
+          {% else %}var(--text){% endif %};"
+        >
+          {{ assignment.plagiarism_percentage ~ '%' if
+          assignment.plagiarism_percentage is not none else 'Not checked' }}
+        </div>
+      </div>
+    </div>
+    <div style="margin-top: 14px; display: flex; gap: 8px">
+      <a
+        href="/download-assignment/{{ assignment.id }}"
+        class="btn btn-secondary btn-sm"
+        >Download File</a
+      >
+      {% if assignment.status.value == 'Checked' %}
+      <a
+        href="/teacher/plagiarism-report/{{ assignment.id }}"
+        class="btn btn-secondary btn-sm"
+        >View Report</a
+      >
+      {% else %}
+      <a
+        href="/teacher/plagiarism/{{ assignment.id }}"
+        class="btn btn-secondary btn-sm"
+        >Run Plagiarism Check</a
+      >
+      {% endif %}
+    </div>
+  </div>
+
+  {% if assignment.auto_graded %}
+  <div class="alert alert-error" style="margin-bottom: 20px">
+    This assignment was automatically graded zero due to plagiarism ({{
+    assignment.plagiarism_percentage }}%). You can override this below.
+  </div>
+  {% endif %}
+
+  <!-- Grading form -->
+  <div class="card">
+    <div class="card-title">Assign Grade</div>
+    <form method="post" action="/teacher/grade/{{ assignment.id }}">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="totalmarks"
+            >Total Marks <span>*</span></label
+          >
+          <input
+            id="totalmarks"
+            name="totalmarks"
+            type="number"
+            class="form-control"
+            min="0"
+            required
+            value="{{ assignment.totalmarks or 100 }}"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="obtmarks"
+            >Obtained Marks <span>*</span></label
+          >
+          <input
+            id="obtmarks"
+            name="obtmarks"
+            type="number"
+            class="form-control"
+            min="0"
+            required
+            value="{{ assignment.obtmarks or 0 }}"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="comment">Feedback / Comment</label>
+        <textarea
+          id="comment"
+          name="comment"
+          class="form-control"
+          rows="4"
+          placeholder="Optional feedback for the student..."
+        >
+{{ assignment.comment or '' }}</textarea
+        >
+      </div>
+
+      <div style="display: flex; gap: 10px">
+        <button type="submit" class="btn btn-primary">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          Save Grade
+        </button>
+        <a href="/teacher/submissions" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

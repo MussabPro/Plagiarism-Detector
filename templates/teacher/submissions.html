@@ -1,0 +1,165 @@
+{% extends "base.html" %} {% block title %}Submissions — PlagCheck{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="flex items-center justify-between page-header">
+    <div>
+      <h1>Submissions</h1>
+      <p>
+        All student submissions for course
+        <strong>{{ current_user.Course }}</strong>.
+      </p>
+    </div>
+    <div style="display: flex; gap: 10px">
+      <a href="/teacher/dashboard" class="btn btn-secondary btn-sm"
+        >← Dashboard</a
+      >
+      {% if assignments %}
+      <form
+        method="post"
+        action="/teacher/delete-all-assignments"
+        onsubmit="
+          return confirm('Delete ALL submissions? This cannot be undone.');
+        "
+      >
+        <button type="submit" class="btn btn-danger btn-sm">Delete All</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if request.query_params.get('error') %}
+  <div class="alert alert-error">{{ request.query_params.get('error') }}</div>
+  {% endif %}
+
+  <div class="card">
+    {% if assignments %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Student</th>
+            <th>File</th>
+            <th>Submitted</th>
+            <th>Status</th>
+            <th>Plagiarism</th>
+            <th>Grade</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in assignments %}
+          <tr>
+            <td class="text-muted text-sm">{{ loop.index }}</td>
+            <td>
+              <div style="font-weight: 500">
+                {{ a.user.Fname }} {{ a.user.Lname or '' }}
+              </div>
+              <div class="text-sm text-muted">ID: {{ a.user.userid }}</div>
+            </td>
+            <td>
+              <div class="font-mono" style="font-size: 12px">
+                {{ a.filename }}
+              </div>
+              <a
+                href="/download-assignment/{{ a.id }}"
+                class="text-sm"
+                style="color: var(--accent)"
+                >Download</a
+              >
+            </td>
+            <td class="text-sm text-muted">
+              {{ a.timeuploaded.strftime('%b %d, %Y %H:%M') if a.timeuploaded
+              else '—' }}
+            </td>
+            <td>
+              {% if a.status.value == 'Checked' %}
+              <span class="status status-checked">Checked</span>
+              {% elif a.status.value == 'Pending' %}
+              <span class="status status-pending">Pending</span>
+              {% else %}
+              <span class="status status-not-checked">Unchecked</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if a.plagiarism_percentage is not none %}
+              <div
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: 4px;
+                  min-width: 80px;
+                "
+              >
+                <span
+                  style="font-weight:600;font-size:13px;color:
+                  {% if a.plagiarism_percentage < 30 %}var(--success)
+                  {% elif a.plagiarism_percentage < 60 %}var(--warn)
+                  {% else %}var(--danger){% endif %};"
+                >
+                  {{ a.plagiarism_percentage }}%
+                </span>
+                <div class="score-bar">
+                  <div
+                    class="score-fill {% if a.plagiarism_percentage < 30 %}score-low {% elif a.plagiarism_percentage < 60 %}score-mid {% else %}score-high{% endif %}"
+                    style="width:{{ [a.plagiarism_percentage, 100]|min }}%;"
+                  ></div>
+                </div>
+              </div>
+              {% else %}—{% endif %}
+            </td>
+            <td>
+              {% if a.obtmarks is not none %}
+              <span style="font-weight: 600">{{ a.obtmarks }}</span>
+              <span class="text-muted">/{{ a.totalmarks }}</span>
+              {% else %}—{% endif %}
+            </td>
+            <td>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap">
+                <a
+                  href="/teacher/plagiarism/{{ a.id }}"
+                  class="btn btn-secondary btn-sm"
+                  >Plagiarism</a
+                >
+                {% if a.status.value == 'Checked' %}
+                <a
+                  href="/teacher/plagiarism-report/{{ a.id }}"
+                  class="btn btn-success btn-sm"
+                  >Report</a
+                >
+                {% endif %}
+                <a
+                  href="/teacher/grade/{{ a.id }}"
+                  class="btn btn-primary btn-sm"
+                  >Grade</a
+                >
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="text-sm text-muted mt-16">
+      Total: {{ assignments|length }} submission{% if assignments|length != 1
+      %}s{% endif %}
+    </div>
+    {% else %}
+    <div class="empty">
+      <svg
+        width="40"
+        height="40"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+      >
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+      </svg>
+      <p>No submissions for <strong>{{ current_user.Course }}</strong> yet.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

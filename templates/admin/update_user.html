@@ -1,0 +1,169 @@
+{% extends "base.html" %} {% block title %}Edit User — PlagCheck{% endblock %}
+{% block content %}
+<div class="page-md">
+  <div class="page-header">
+    <h1>Edit User</h1>
+    <p>Update account details for <strong>{{ user.username }}</strong>.</p>
+  </div>
+
+  {% if error %}
+  <div class="alert alert-error">{{ error }}</div>
+  {% endif %}
+
+  <div class="card">
+    <form method="post" action="/admin/update-user/{{ user.id }}">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="fname"
+            >First Name <span>*</span></label
+          >
+          <input
+            id="fname"
+            name="Fname"
+            type="text"
+            class="form-control"
+            required
+            value="{{ user.Fname }}"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="lname">Last Name</label>
+          <input
+            id="lname"
+            name="Lname"
+            type="text"
+            class="form-control"
+            value="{{ user.Lname or '' }}"
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="username"
+            >Username <span>*</span></label
+          >
+          <input
+            id="username"
+            name="username"
+            type="text"
+            class="form-control"
+            required
+            value="{{ user.username }}"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="userid"
+            >Student / Staff ID <span>*</span></label
+          >
+          <input
+            id="userid"
+            name="userid"
+            type="number"
+            class="form-control"
+            required
+            value="{{ user.userid }}"
+            min="1"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">Email <span>*</span></label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          class="form-control"
+          required
+          value="{{ user.email }}"
+        />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone Number</label>
+          <input
+            id="phone"
+            name="PhoneNo"
+            type="text"
+            class="form-control"
+            value="{{ user.PhoneNo or '' }}"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="course">Course <span>*</span></label>
+          <select id="course" name="Course" class="form-control" required>
+            <option value="">— Select course —</option>
+            {% set courses = [ ("CS", "CS — Computer Science"), ("SE", "SE —
+            Software Engineering"), ("IT", "IT — Information Technology"),
+            ("DS", "DS — Data Science"), ("AI", "AI — Artificial Intelligence"),
+            ("CY", "CY — Cybersecurity"), ("NET", "NET — Networking") ] %} {%
+            for code, label in courses %}
+            <option
+              value="{{ code }}"
+              {%
+              if
+              user.Course=""
+              ="code"
+              %}selected{%
+              endif
+              %}
+            >
+              {{ label }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="role">Role <span>*</span></label>
+        <select id="role" name="role" class="form-control" required>
+          <option
+            value="Student"
+            {%
+            if
+            user.role.value=""
+            ="Student"
+            %}selected{%
+            endif
+            %}
+          >
+            Student
+          </option>
+          <option
+            value="Teacher"
+            {%
+            if
+            user.role.value=""
+            ="Teacher"
+            %}selected{%
+            endif
+            %}
+          >
+            Teacher
+          </option>
+          <option
+            value="Admin"
+            {%
+            if
+            user.role.value=""
+            ="Admin"
+            %}selected{%
+            endif
+            %}
+          >
+            Admin
+          </option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 16px">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="/admin/" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
