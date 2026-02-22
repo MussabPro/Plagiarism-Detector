@@ -2,16 +2,25 @@
 Text processing utilities.
 Functions for text cleaning, tokenization, and preprocessing for plagiarism detection.
 """
+from nltk.tokenize import word_tokenize
+import os
 import re
 import nltk
 from typing import List, Set
-from nltk.tokenize import word_tokenize
 
-# Ensure NLTK data is downloaded
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt', quiet=True)
+# Force NLTK to use /tmp on Vercel (only writable directory in serverless)
+nltk.data.path.insert(0, "/tmp/nltk_data")
+
+# Ensure NLTK data is downloaded at import time
+for _pkg in ("punkt", "punkt_tab"):
+    try:
+        nltk.data.find(f"tokenizers/{_pkg}")
+    except LookupError:
+        try:
+            nltk.download(_pkg, download_dir="/tmp/nltk_data", quiet=True)
+        except Exception:
+            # Gracefully degrade if download fails (e.g. no network on Vercel)
+            pass
 
 
 def tokenize_text(text: str) -> List[str]:

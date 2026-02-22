@@ -9,6 +9,9 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
+import os
+from pathlib import Path
+
 from app.core.config import settings
 from app.core.exceptions import (
     AuthenticationError,
@@ -129,11 +132,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Use absolute paths so these always resolve regardless of CWD (critical on Vercel)
+_BASE_DIR = Path(__file__).resolve().parent.parent
+
 # Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=str(_BASE_DIR / "static")), name="static")
 
 # Setup templates
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=str(_BASE_DIR / "templates"))
 
 # Add custom filters to Jinja2
 templates.env.globals["settings"] = settings
