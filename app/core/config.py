@@ -32,7 +32,8 @@ class Settings(BaseSettings):
     # File Upload
     MAX_UPLOAD_SIZE: int = 16 * 1024 * 1024  # 16MB
     ALLOWED_EXTENSIONS: set = {".txt", ".pdf", ".docx"}
-    UPLOAD_FOLDER: str = "uploads"  # For temporary file processing
+    # Use /tmp on Vercel (only writable directory in serverless environments)
+    UPLOAD_FOLDER: str = "/tmp/uploads"
 
     # Plagiarism Detection
     DEFAULT_PLAGIARISM_THRESHOLD: float = 40.0

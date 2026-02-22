@@ -27,13 +27,21 @@ from app.core.security import get_password_hash
 from app.api.v1 import auth, admin, teacher, student, common
 
 # Configure logging
+# Use StreamHandler only — Vercel's filesystem is read-only
+_log_handlers = [logging.StreamHandler()]
+try:
+    # Only add FileHandler if the log directory is writable (local dev)
+    _log_file = settings.LOG_FILE if settings.LOG_FILE.startswith(
+        "/tmp") else f"/tmp/{settings.LOG_FILE}"
+    _log_handlers.append(logging.FileHandler(_log_file))
+except Exception:
+    # Silently skip file logging when filesystem is read-only (e.g. Vercel)
+    pass
+
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(settings.LOG_FILE),
-        logging.StreamHandler()
-    ]
+    handlers=_log_handlers
 )
 
 logger = logging.getLogger(__name__)
@@ -47,12 +55,17 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting up application...")
 
-    # Initialize database
-    init_db()
-    logger.info("Database initialized")
-
-    # Create admin user if doesn't exist
-    create_default_admin()
+    # Initialize database — wrapped so a missing/unreachable DB doesn't
+    # crash the entire serverless function on cold start
+    try:
+        init_db()
+        logger.info("Database initialized")
+        # Create admin user if doesn't exist
+        create_default_admin()
+    except Exception as db_exc:
+        logger.error(
+            f"Database initialization failed (app will still start): {db_exc}"
+        )
 
     logger.info(
         f"{settings.APP_NAME} v{settings.VERSION} started successfully")
